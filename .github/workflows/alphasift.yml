@@ -1,0 +1,26 @@
+name: AlphaSift daily screen to Telegram
+
+on:
+  schedule:
+    - cron: "40 7 * * 1-5"
+  workflow_dispatch:
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install AlphaSift
+        run: pip install -e .
+      - name: Screen and push to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ALPHASIFT_STRATEGY: ${{ vars.ALPHASIFT_STRATEGY || 'dual_low' }}
+          ALPHASIFT_MAX_OUTPUT: ${{ vars.ALPHASIFT_MAX_OUTPUT || '10' }}
+        run: python alphasift_to_telegram.py
